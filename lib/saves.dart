@@ -3,8 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../utils.dart';
-
 class Item {
   static String imageURL(String contentID, int zoom) {
     return "https://books.google.com/books/content?id=$contentID&printsec=frontcover&img=1&zoom=$zoom&source=gbs_api";
@@ -139,13 +137,11 @@ class LibraryData extends SyncedData {
     dateTime = dateTime.replaceAll(RegExp("[:-]"), "");
     dateTime = dateTime.replaceAll(" ", "_");
 
-    Directory? downloadsDirectory = getDownloadsDirectoryCustom();
-    if (downloadsDirectory == null) return null;
+    String? filename = "books-$dateTime.json";
 
-    String filename = "books-$dateTime.json";
+    File saveFile = File("${downloads!.path}/$filename");
+    saveFile.writeAsStringSync(jsonEncode(toJson()), flush: true);
 
-    File saveFile = File("${downloadsDirectory.path}/$filename");
-    saveFile.writeAsStringSync(jsonEncode(toJson()));
     return filename;
   }
 
@@ -313,7 +309,7 @@ class SettingsData extends SyncedData {
     if (colorNames.containsKey(seedColor)) {
       return colorNames[seedColor]!;
     }
-    return seedColor.value.toString();
+    return seedColor.toARGB32().toString();
   }
 
   String themeModeName() {
@@ -333,6 +329,8 @@ class SettingsData extends SyncedData {
 }
 
 late Directory storageRoot;
-String appVersion = "release_4.5.1";
+late Directory? downloads;
+
+String appVersion = "release_4.5.2";
 LibraryData libraryData = LibraryData();
 SettingsData settingsData = SettingsData();

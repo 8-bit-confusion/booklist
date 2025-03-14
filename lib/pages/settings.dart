@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:booklist/pages/about.dart';
 import 'package:booklist/saves.dart';
-import 'package:booklist/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -191,13 +190,13 @@ class _SettingsState extends State<Settings> {
                         String snackBarText;
                         IconData snackBarIcon;
 
-                        String? exportPath = libraryData.export();
-                        if (exportPath != null) {
+                        if (downloads == null || !downloads!.existsSync()) {
+                          snackBarText = "Could not export—downloads directory does not exist.";
+                          snackBarIcon = Icons.error;
+                        } else {
+                          String? exportPath = libraryData.export();
                           snackBarText = "Saved as '$exportPath'.";
                           snackBarIcon = Icons.download_done;
-                        } else {
-                          snackBarText = "Could not export—downloads folder does not exist.";
-                          snackBarIcon = Icons.error;
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -207,8 +206,8 @@ class _SettingsState extends State<Settings> {
                                   Icon(snackBarIcon,
                                     color: Theme.of(context).colorScheme.surface,),
                                   const SizedBox(width: 16.0,),
-                                  Text(snackBarText, style: TextStyle(
-                                    color: Theme.of(context).colorScheme.surface,),),
+                                  Flexible(child: Text(snackBarText, style: TextStyle(
+                                    color: Theme.of(context).colorScheme.surface,),),),
                                 ],
                               ),
                               backgroundColor: Theme.of(context).colorScheme.onSurface,
@@ -217,7 +216,7 @@ class _SettingsState extends State<Settings> {
                       },
                     ),
                     Divider(height: 1.0, thickness: 1.0, indent: 56.0, endIndent: 24.0,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.25),),
+                      color: Theme.of(context).colorScheme.primary.withAlpha(64),),
                     ListTile(
                       leading: const Icon(Icons.upload),
                       title: const Text("Import save data", style: TextStyle(fontWeight: FontWeight.w300,),),
@@ -251,7 +250,7 @@ class _SettingsState extends State<Settings> {
                       },
                     ),
                     Divider(height: 1.0, thickness: 1.0, indent: 56.0, endIndent: 24.0,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.25),),
+                      color: Theme.of(context).colorScheme.primary.withAlpha(64),),
                     ListTile(
                       leading: const Icon(Icons.delete_forever),
                       title: const Text("Clear local save data", style: TextStyle(fontWeight: FontWeight.w300,),),
@@ -308,7 +307,7 @@ class _SettingsState extends State<Settings> {
                       },
                     ),
                     Divider(height: 1.0, thickness: 1.0, indent: 56.0, endIndent: 24.0,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.25),),
+                      color: Theme.of(context).colorScheme.primary.withAlpha(64),),
                     ListTile(
                       leading: const Icon(Icons.replay),
                       title: const Text("Reset preferences", style: TextStyle(fontWeight: FontWeight.w300,),),
@@ -415,14 +414,13 @@ class _SettingsState extends State<Settings> {
                       .where((FileSystemEntity fileEntity) => fileEntity.path.endsWith(".books"))
                       .map((FileSystemEntity fileEntity) => "\t- ${fileEntity.path.substring(fileEntity.path.lastIndexOf("/"))}\n")
                       .toList().join("")}"
-                  "downloadsDirectory: ${getDownloadsDirectoryCustom()!.path}\n"
                   "colorScheme:\n"
-                  "\t.onSurface: 0x${Theme.of(context).colorScheme.onSurface.value.toRadixString(16).substring(2)}\n"
-                  "\t.primary: 0x${Theme.of(context).colorScheme.primary.value.toRadixString(16).substring(2)}\n"
-                  "\t.fadedPrimary: 0x${Color.lerp(Theme.of(context).colorScheme.inversePrimary, Theme.of(context).colorScheme.onSurface, 0.3)!.value.toRadixString(16).substring(2)}\n"
-                  "\t.darkenedSecondary: 0x${Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondaryContainer, 0.75)!.value.toRadixString(16).substring(2)}\n"
-                  "\t.secondaryContainer: 0x${Theme.of(context).colorScheme.secondaryContainer.value.toRadixString(16).substring(2)}\n"
-                  "\t.surface: 0x${Theme.of(context).colorScheme.surface.value.toRadixString(16).substring(2)}",
+                  "\t.onSurface: 0x${Theme.of(context).colorScheme.onSurface.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.primary: 0x${Theme.of(context).colorScheme.primary.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.fadedPrimary: 0x${Color.lerp(Theme.of(context).colorScheme.inversePrimary, Theme.of(context).colorScheme.onSurface, 0.3)!.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.darkenedSecondary: 0x${Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondaryContainer, 0.75)!.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.secondaryContainer: 0x${Theme.of(context).colorScheme.secondaryContainer.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.surface: 0x${Theme.of(context).colorScheme.surface.toARGB32().toRadixString(16).substring(2)}",
                 style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.w300,
                     color: Theme.of(context).colorScheme.primary),
               ),

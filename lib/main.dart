@@ -15,7 +15,13 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   getApplicationDocumentsDirectory().then((Directory value) {
     storageRoot = value;
-    runApp(const App());
+    getDownloadsDirectory().then((Directory? value) {
+      downloads = value;
+
+      print(storageRoot);
+      print(downloads);
+      runApp(const App());
+    });
   });
 }
 

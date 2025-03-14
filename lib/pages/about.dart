@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -30,7 +32,7 @@ class _AboutState extends State<About> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: <Widget>[
-            SizedBox(height: 96.0 - (MediaQuery.of(context).viewPadding.top + kToolbarHeight),),
+            SizedBox(height: max(0, 96.0 - (MediaQuery.of(context).viewPadding.top + kToolbarHeight)),),
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -72,6 +74,8 @@ class _AboutState extends State<About> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Container(
+                      height: 48.0,
+                      width: 48.0,
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.secondaryContainer,
                         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
