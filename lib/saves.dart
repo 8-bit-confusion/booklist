@@ -309,7 +309,7 @@ class SettingsData extends SyncedData {
     if (colorNames.containsKey(seedColor)) {
       return colorNames[seedColor]!;
     }
-    return seedColor.toARGB32().toString();
+    return seedColor.value.toString();
   }
 
   String themeModeName() {

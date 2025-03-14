@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 double luma(Color c) {
-  return (0.299 * c.r) + (0.587 * c.g) + (0.114 * c.b);
+  return (0.299 * c.red) + (0.587 * c.green) + (0.114 * c.blue);
 }
 
 Color onColor(BuildContext context, Color color) {
