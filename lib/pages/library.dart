@@ -98,9 +98,15 @@ class _LibraryState extends State<Library> {
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 ),
                                 icon: Icon(Icons.sort, size: 18.0, color: Theme.of(context).colorScheme.primary,),
-                                label: Text("Sort by: ${SettingsData.methodNames[settingsData.sortMethod]}",
-                                  style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12.0,
-                                    color: Theme.of(context).colorScheme.primary,),),
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text("Sort by: ${SettingsData.methodNames[settingsData.sortMethod]}",
+                                      style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12.0,
+                                        color: Theme.of(context).colorScheme.primary,),),
+                                    Icon(Icons.arrow_drop_down, size: 18.0, color: Theme.of(context).colorScheme.primary,),
+                                  ],
+                                ),
                                 onPressed: () {
                                   showDialog(
                                       context: context,
@@ -168,7 +174,8 @@ class _LibraryState extends State<Library> {
                                       )
                                   );
                                 },
-                              )
+                              ),
+                              const SizedBox(height: 8.0),
                             ],
                           ),
                           itemBuilder: (BuildContext context, int index) {
