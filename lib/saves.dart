@@ -3,6 +3,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+enum SortMethod {
+  custom,
+  recent,
+  title,
+  author
+}
+
 class Item {
   static String imageURL(String contentID, int zoom) {
     return "https://books.google.com/books/content?id=$contentID&printsec=frontcover&img=1&zoom=$zoom&source=gbs_api";
@@ -74,6 +81,34 @@ class Item {
   };
 }
 
+class ReadingUpdate {
+  final DateTime timestamp;
+  final int pages;
+  final String id;
+  final int bookCompletions;
+
+  ReadingUpdate({
+    required this.timestamp,
+    required this.pages,
+    required this.id,
+    required this.bookCompletions,
+  });
+
+  ReadingUpdate.fromJson(Map<String, dynamic> data) : this(
+    timestamp: DateTime.parse(data["timestamp"]),
+    pages: data["pages"],
+    id: data["id"],
+    bookCompletions: data["bookCompletions"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "timestamp": timestamp.toIso8601String(),
+    "pages": pages,
+    "id": id,
+    "bookCompletions": bookCompletions,
+  };
+}
+
 class SyncedData with ChangeNotifier {
   late File dataFile;
 
@@ -86,10 +121,10 @@ class SyncedData with ChangeNotifier {
 
   void syncFromSave() {
     notifyListeners();
+    setDefaults();
     if (dataFile.existsSync()) {
       loadFromJson(jsonDecode(dataFile.readAsStringSync()));
     } else {
-      setDefaults();
       syncToSave();
     }
   }
@@ -102,6 +137,7 @@ class LibraryData extends SyncedData {
   late List<String> library;
   late Map<String, Item> libraryItems;
   late Map<String, int> libraryProgress;
+  late Map<String, DateTime> readTimestamps;
 
   static const String dataFileName = "libData.books";
 
@@ -115,13 +151,15 @@ class LibraryData extends SyncedData {
     library = [];
     libraryItems = {};
     libraryProgress = {};
+    readTimestamps = {};
   }
 
   @override
   void loadFromJson(Map<String, dynamic> data) {
-    library = data["library"].map<String>((dynamic value) => value.toString()).toList();
-    libraryItems = data["libraryItems"].map<String, Item>((String key, dynamic value) => MapEntry(key, Item.fromJson(value)));
-    libraryProgress = data["libraryProgress"].map<String, int>((String key, dynamic value) => MapEntry(key, value as int));
+    if (data["library"] != null) library = data["library"].map<String>((dynamic value) => value.toString()).toList();
+    if (data["libraryItems"] != null) libraryItems = data["libraryItems"].map<String, Item>((String key, dynamic value) => MapEntry(key, Item.fromJson(value)));
+    if (data["libraryProgress"] != null) libraryProgress = data["libraryProgress"].map<String, int>((String key, dynamic value) => MapEntry(key, value as int));
+    if (data["readTimestamps"] != null) readTimestamps = data["readTimestamps"].map<String, DateTime>((String key, dynamic value) => MapEntry(key, DateTime.parse(value)));
   }
 
   @override
@@ -129,6 +167,7 @@ class LibraryData extends SyncedData {
     "library": library,
     "libraryItems": libraryItems.map((String key, Item value) => MapEntry(key, value.toJson())),
     "libraryProgress": libraryProgress.map((String key, int value) => MapEntry(key, value)),
+    "readTimestamps": readTimestamps.map((String key, DateTime value) => MapEntry(key, value.toIso8601String())),
   };
 
   String? export() {
@@ -160,6 +199,10 @@ class LibraryData extends SyncedData {
     return libraryItems.containsKey(item.id);
   }
 
+  List<Item> items() => library
+      .map((String id) => libraryItems[id]!)
+      .toList();
+
   bool isCompleted(Item item) => item.pageCount == libraryProgress[item.id];
 
   List<Item> completeItems() => library
@@ -175,8 +218,13 @@ class LibraryData extends SyncedData {
   int incompleteItemCount() => incompleteItems().length;
 
   int getProgress(Item item) {
-    if (!libraryProgress.containsKey(item.id)) { libraryProgress[item.id] = 0; }
+    if (!libraryProgress.containsKey(item.id)) libraryProgress[item.id] = 0;
     return libraryProgress[item.id]!;
+  }
+
+  DateTime getReadTimestamp(Item item) {
+    if (!readTimestamps.containsKey(item.id)) readTimestamps[item.id] = DateTime.fromMillisecondsSinceEpoch(0);
+    return readTimestamps[item.id]!;
   }
 
   void add(Item item) {
@@ -204,6 +252,11 @@ class LibraryData extends SyncedData {
     syncToSave();
   }
 
+  void setReadTimestamp(Item item, DateTime newTimestamp) {
+    readTimestamps[item.id] = newTimestamp;
+    syncToSave();
+  }
+
   void overridePageCount(Item item, int newPageCount) {
     item.pageCount = newPageCount;
     if (getProgress(item) > newPageCount) setProgress(item, newPageCount);
@@ -222,6 +275,7 @@ class LibraryData extends SyncedData {
 class SettingsData extends SyncedData {
   late Color seedColor;
   late ThemeMode themeMode;
+  late SortMethod sortMethod;
   late int searchResultCount;
   late bool showCompletedBooks;
 
@@ -256,6 +310,22 @@ class SettingsData extends SyncedData {
 
   static Map<String, ThemeMode> modeValues = Map.fromIterables(modeNames.values, modeNames.keys);
 
+  static Map<SortMethod, String> methodNames = {
+    SortMethod.custom: "Custom",
+    SortMethod.recent: "Most recent",
+    SortMethod.title: "Title (A-Z)",
+    SortMethod.author: "Author (A-Z)",
+  };
+
+  static Map<String, SortMethod> methodValues = Map.fromIterables(methodNames.values, methodNames.keys);
+
+  static Map<SortMethod, int Function(Item, Item)> methodImplementation = {
+    SortMethod.custom: (Item a, Item b) => 0,
+    SortMethod.recent: (Item a, Item b) => -libraryData.getReadTimestamp(a).compareTo(libraryData.getReadTimestamp(b)),
+    SortMethod.title: (Item a, Item b) => a.title.compareTo(b.title),
+    SortMethod.author: (Item a, Item b) => a.authors.compareTo(b.authors),
+  };
+
   SettingsData() {
     dataFile = File("${storageRoot.path}/$dataFileName");
     syncFromSave();
@@ -265,22 +335,25 @@ class SettingsData extends SyncedData {
   void setDefaults() {
     seedColor = Colors.amber;
     themeMode = ThemeMode.light;
+    sortMethod = SortMethod.custom;
     searchResultCount = 15;
     showCompletedBooks = false;
   }
 
   @override
   void loadFromJson(Map<String, dynamic> data) {
-    seedColor = materialColorFromString(data["seedColor"]);
-    themeMode = themeModeFromString(data["themeMode"]);
-    searchResultCount = data["searchResultCount"];
-    showCompletedBooks = data["showCompletedBooks"];
+    if (data["seedColor"] != null) seedColor = materialColorFromString(data["seedColor"]);
+    if (data["themeMode"] != null) themeMode = themeModeFromString(data["themeMode"]);
+    if (data["sortMethod"] != null) sortMethod = sortMethodFromString(data["sortMethod"]);
+    if (data["searchResultCount"] != null) searchResultCount = data["searchResultCount"];
+    if (data["showCompletedBooks"] != null) showCompletedBooks = data["showCompletedBooks"];
   }
 
   @override
   Map<String, dynamic> toJson() => {
     "seedColor": seedColorName(),
     "themeMode": themeModeName(),
+    "sortMethod": sortMethodName(),
     "searchResultCount": searchResultCount,
     "showCompletedBooks": showCompletedBooks,
   };
@@ -292,6 +365,11 @@ class SettingsData extends SyncedData {
 
   void setThemeMode(ThemeMode mode) {
     themeMode = mode;
+    syncToSave();
+  }
+
+  void setSortMethod(SortMethod method) {
+    sortMethod = method;
     syncToSave();
   }
 
@@ -316,6 +394,10 @@ class SettingsData extends SyncedData {
     return modeNames[themeMode]!;
   }
 
+  String sortMethodName() {
+    return methodNames[sortMethod]!;
+  }
+
   static Color materialColorFromString(String colorString) {
     if (colorValues.containsKey(colorString)) {
       return colorValues[colorString]!;
@@ -326,6 +408,41 @@ class SettingsData extends SyncedData {
   static ThemeMode themeModeFromString(String modeString) {
     return modeValues[modeString]!;
   }
+
+  static SortMethod sortMethodFromString(String methodString) {
+    return methodValues[methodString]!;
+  }
+}
+
+class StatsData extends SyncedData {
+  late List<ReadingUpdate> readingUpdates;
+
+  static const String dataFileName = "statsData.books";
+
+  StatsData() {
+    dataFile = File("${storageRoot.path}/$dataFileName");
+    syncFromSave();
+  }
+
+  @override
+  void setDefaults() {
+    readingUpdates = [];
+  }
+
+  @override
+  void loadFromJson(Map<String, dynamic> data) {
+    if (data["readingUpdates"] != null) readingUpdates = data["readingUpdates"].map<ReadingUpdate>((dynamic value) => ReadingUpdate.fromJson(value)).toList();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    "readingUpdates": readingUpdates.map<Map<String, dynamic>>((ReadingUpdate value) => value.toJson()).toList(),
+  };
+
+  void add(ReadingUpdate update) {
+    readingUpdates.add(update);
+    syncToSave();
+  }
 }
 
 late Directory storageRoot;
@@ -333,5 +450,7 @@ late Directory? downloads;
 
 late String appVersion;
 String appVersionPrefix = "indev_";
+
 LibraryData libraryData = LibraryData();
 SettingsData settingsData = SettingsData();
+StatsData statsData = StatsData();

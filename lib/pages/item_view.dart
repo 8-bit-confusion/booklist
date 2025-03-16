@@ -346,7 +346,23 @@ class _ItemViewState extends State<ItemView> {
                       onFieldSubmitted: (String value) {
                         if (int.tryParse(value) != null) {
                           int pages = int.parse(value).clamp(0, widget.item.pageCount);
-                          setState(() { libraryData.setProgress(widget.item, pages); });
+                          setState(() {
+                            int completions = 0;
+                            int prevPages = libraryData.getProgress(widget.item);
+                            if (prevPages == widget.item.pageCount && pages < prevPages) completions = -1;
+                            if (pages == widget.item.pageCount && prevPages < pages) completions = 1;
+
+                            DateTime timestamp = DateTime.now();
+                            statsData.add(ReadingUpdate(
+                              timestamp: timestamp,
+                              pages: pages - prevPages,
+                              id: widget.item.id,
+                              bookCompletions: completions,
+                            ));
+
+                            libraryData.setProgress(widget.item, pages);
+                            libraryData.setReadTimestamp(widget.item, timestamp);
+                          });
                           Navigator.of(context).pop();
                         }
                       },

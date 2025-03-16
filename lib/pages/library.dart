@@ -90,6 +90,7 @@ class _LibraryState extends State<Library> {
                             libraryData.reorder(startIndex, endIndex);
                           },
                           header: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Divider(height: 1.0, thickness: 1.0,
                                 color: Theme.of(context).colorScheme.primary.withAlpha(64),),
@@ -104,10 +105,92 @@ class _LibraryState extends State<Library> {
                               ),
                               Divider(height: 1.0, thickness: 1.0,
                                 color: Theme.of(context).colorScheme.primary.withAlpha(64),),
+                              TextButton.icon(
+                                style: const ButtonStyle(
+                                  splashFactory: null,
+                                  overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                                  padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+                                  minimumSize: WidgetStatePropertyAll(Size.zero),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                icon: Icon(Icons.sort, size: 18.0, color: Theme.of(context).colorScheme.primary,),
+                                label: Text("Sort by: ${SettingsData.methodNames[settingsData.sortMethod]}",
+                                  style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12.0,
+                                    color: Theme.of(context).colorScheme.primary,),),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) => AlertDialog(
+                                        title: Text(
+                                          "Sort library by:",
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontSize: 16.0,
+                                          ),
+                                        ),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            RadioListTile(
+                                              value: SortMethod.custom,
+                                              groupValue: settingsData.sortMethod,
+                                              dense: true,
+                                              title: Text("Custom", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                color: Theme.of(context).colorScheme.primary,),),
+                                              onChanged: (SortMethod? value) {
+                                                if (value != null) {
+                                                  setState(() { settingsData.setSortMethod(value); });
+                                                }
+                                              },
+                                            ),
+                                            RadioListTile(
+                                              value: SortMethod.recent,
+                                              groupValue: settingsData.sortMethod,
+                                              dense: true,
+                                              title: Text("Most recent", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                color: Theme.of(context).colorScheme.primary,),),
+                                              onChanged: (SortMethod? value) {
+                                                if (value != null) {
+                                                  setState(() { settingsData.setSortMethod(value); });
+                                                }
+                                              },
+                                            ),
+                                            RadioListTile(
+                                              value: SortMethod.title,
+                                              groupValue: settingsData.sortMethod,
+                                              dense: true,
+                                              title: Text("Title (A-Z)", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                color: Theme.of(context).colorScheme.primary,),),
+                                              onChanged: (SortMethod? value) {
+                                                if (value != null) {
+                                                  setState(() { settingsData.setSortMethod(value); });
+                                                }
+                                              },
+                                            ),
+                                            RadioListTile(
+                                              value: SortMethod.author,
+                                              groupValue: settingsData.sortMethod,
+                                              dense: true,
+                                              title: Text("Author's name (A-Z)", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                color: Theme.of(context).colorScheme.primary,),),
+                                              onChanged: (SortMethod? value) {
+                                                if (value != null) {
+                                                  setState(() { settingsData.setSortMethod(value); });
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                  );
+                                },
+                              )
                             ],
                           ),
                           itemBuilder: (BuildContext context, int index) {
-                            Item result = settingsData.showCompletedBooks ? libraryData[index] : libraryData.incompleteItems()[index];
+                            List<Item> renderedItems = settingsData.showCompletedBooks ? libraryData.items() : libraryData.incompleteItems();
+                            List<Item> sortedItems = renderedItems.toList()..sort(SettingsData.methodImplementation[settingsData.sortMethod]);
+                            Item result = sortedItems[index];
 
                             return ListTile(
                               key: Key('$index'),
