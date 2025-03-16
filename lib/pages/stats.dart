@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -17,14 +18,26 @@ class Stats extends PageContent {
 }
 
 class _StatsState extends State<Stats> {
-  List<int> indexes = [0, 1, 2, 3, 4, 5, 6];
-  List<String> titles = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+  bool sameWeek(DateTime a, DateTime b) {
+    DateTime d1 = a.subtract(Duration(days: a.weekday - 1)).copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+    DateTime d2 = b.subtract(Duration(days: b.weekday - 1)).copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+    return d1.compareTo(d2) == 0;
+  }
+
+  bool sameMonth(DateTime a, DateTime b) {
+    return a.month == b.month && a.year == b.year;
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<double> weekPages = indexes
-        .map((int weekday) => statsData.readingUpdates
-            .where((ReadingUpdate update) => (update.timestamp.weekday == weekday + 1 && (update.timestamp.day - DateTime.now().day).abs() < 7))
+    List<int> indexes = List<int>.generate(SettingsData.spanTitles[settingsData.timeSpan]!.length, (i) => i);
+    List<double> barHeights = indexes
+        .map((int index) => statsData.readingUpdates
+            .where(
+              settingsData.timeSpan == TimeSpan.week  ? (ReadingUpdate update) => (update.timestamp.weekday == index + 1 && sameWeek(update.timestamp, DateTime.now())) :
+              settingsData.timeSpan == TimeSpan.month ? (ReadingUpdate update) => (update.timestamp.day == index + 1 && sameMonth(update.timestamp, DateTime.now())) :
+              (ReadingUpdate update) => (update.timestamp.month == index + 1 && update.timestamp.year == DateTime.now().year)
+            )
             .map((ReadingUpdate update) => update.pages)
             .followedBy([0])
             .reduce((int a, int b) => a + b)
@@ -48,6 +61,84 @@ class _StatsState extends State<Stats> {
             ),
           ),
           const SizedBox(height: 24.0,),
+          Row(
+            children: <Widget>[
+              Text("Pages read this ", style: TextStyle(fontWeight: FontWeight.w300,
+                color: Theme.of(context).colorScheme.primary,),),
+              TextButton(
+                style: const ButtonStyle(
+                  splashFactory: null,
+                  overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                  padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+                  minimumSize: WidgetStatePropertyAll(Size.zero),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Text(SettingsData.spanNames[settingsData.timeSpan]!.toLowerCase(),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary,),),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
+                ),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: Text(
+                          "Time span:",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            RadioListTile(
+                              value: TimeSpan.week,
+                              groupValue: settingsData.timeSpan,
+                              dense: true,
+                              title: Text("Week", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                color: Theme.of(context).colorScheme.primary,),),
+                              onChanged: (TimeSpan? value) {
+                                if (value != null) {
+                                  setState(() { settingsData.setTimeSpan(value); });
+                                }
+                              },
+                            ),
+                            RadioListTile(
+                              value: TimeSpan.month,
+                              groupValue: settingsData.timeSpan,
+                              dense: true,
+                              title: Text("Month", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                color: Theme.of(context).colorScheme.primary,),),
+                              onChanged: (TimeSpan? value) {
+                                if (value != null) {
+                                  setState(() { settingsData.setTimeSpan(value); });
+                                }
+                              },
+                            ),
+                            RadioListTile(
+                              value: TimeSpan.year,
+                              groupValue: settingsData.timeSpan,
+                              dense: true,
+                              title: Text("Year", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                color: Theme.of(context).colorScheme.primary,),),
+                              onChanged: (TimeSpan? value) {
+                                if (value != null) {
+                                  setState(() { settingsData.setTimeSpan(value); });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      )
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12.0,),
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -59,8 +150,8 @@ class _StatsState extends State<Stats> {
             height: 256.0,
             child: BarChart(
               BarChartData(
-                minY: -weekPages.reduce((double a, double b) => max(a, b)) * 0.05,
-                maxY: weekPages.reduce((double a, double b) => max(a, b)) * 1.15,
+                minY: -barHeights.reduce((double a, double b) => max(a, b)) * 0.05,
+                maxY: barHeights.reduce((double a, double b) => max(a, b)) * 1.15,
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.inversePrimary))),
                 titlesData: FlTitlesData(
@@ -72,11 +163,11 @@ class _StatsState extends State<Stats> {
                       showTitles: true,
                       reservedSize: 32.0,
                       getTitlesWidget: (double axisValue, TitleMeta meta) {
-                        return Container(
+                        return settingsData.timeSpan != TimeSpan.month || [1, 5, 10, 15, 20, 25, 31].contains(axisValue.toInt() + 1) ?  Container(
                           padding: const EdgeInsets.only(top: 8.0,),
-                          child: Text(titles[axisValue.toInt()], style: TextStyle(
+                          child: Text(SettingsData.spanTitles[settingsData.timeSpan]![axisValue.toInt()], style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,),),
-                        );
+                        ) : Container();
                       }
                     )
                   )
@@ -103,20 +194,25 @@ class _StatsState extends State<Stats> {
                         Theme.of(context).colorScheme.inversePrimary,
                       ]
                     ),
-                    width: 16.0,
-                    toY: weekPages[index],
+                    width: settingsData.timeSpan == TimeSpan.week ? 16.0 : settingsData.timeSpan == TimeSpan.month ? 8.0 : 12.0,
+                    toY: barHeights[index],
                   )],
-                  showingTooltipIndicators: weekPages[index] > 0 ? [0] : [],
+                  showingTooltipIndicators: barHeights[index] > 0 && (settingsData.timeSpan != TimeSpan.month ||
+                      barHeights[index] == barHeights.reduce((double a, double b) => max(a, b))) ? [0] : [],
                 )).toList()
               )
             ),
           ),
-          const SizedBox(height: 24.0,),
-          Text(
-            statsData.toJson().toString(),
-            style: const TextStyle(fontSize: 8.0),
+        ] + (kDebugMode ? [Expanded(
+          child: ListView(
+            children: <Widget>[
+              Text(
+                statsData.toJson().toString(),
+                style: const TextStyle(fontSize: 8.0),
+              ),
+            ],
           ),
-        ]
+        )] : []),
       )
     );
   }

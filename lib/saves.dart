@@ -7,7 +7,18 @@ enum SortMethod {
   custom,
   recent,
   title,
-  author
+  author,
+}
+
+enum TimeSpan {
+  week,
+  month,
+  year,
+}
+
+enum Statistic {
+  pagesRead,
+  booksCompleted,
 }
 
 class Item {
@@ -276,6 +287,7 @@ class SettingsData extends SyncedData {
   late Color seedColor;
   late ThemeMode themeMode;
   late SortMethod sortMethod;
+  late TimeSpan timeSpan;
   late int searchResultCount;
   late bool showCompletedBooks;
 
@@ -326,6 +338,20 @@ class SettingsData extends SyncedData {
     SortMethod.author: (Item a, Item b) => a.authors.compareTo(b.authors),
   };
 
+  static Map<TimeSpan, String> spanNames = {
+    TimeSpan.week: "Week",
+    TimeSpan.month: "Month",
+    TimeSpan.year: "Year",
+  };
+
+  static Map<String, TimeSpan> spanValues = Map.fromIterables(spanNames.values, spanNames.keys);
+
+  static Map<TimeSpan, List<String>> spanTitles = {
+    TimeSpan.week: ["M", "T", "W", "T", "F", "S", "S"],
+    TimeSpan.month: List<String>.generate(31, (i) => (i + 1).toString()),
+    TimeSpan.year: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+  };
+
   SettingsData() {
     dataFile = File("${storageRoot.path}/$dataFileName");
     syncFromSave();
@@ -336,6 +362,7 @@ class SettingsData extends SyncedData {
     seedColor = Colors.amber;
     themeMode = ThemeMode.light;
     sortMethod = SortMethod.custom;
+    timeSpan = TimeSpan.week;
     searchResultCount = 15;
     showCompletedBooks = false;
   }
@@ -343,8 +370,9 @@ class SettingsData extends SyncedData {
   @override
   void loadFromJson(Map<String, dynamic> data) {
     if (data["seedColor"] != null) seedColor = materialColorFromString(data["seedColor"]);
-    if (data["themeMode"] != null) themeMode = themeModeFromString(data["themeMode"]);
-    if (data["sortMethod"] != null) sortMethod = sortMethodFromString(data["sortMethod"]);
+    if (data["themeMode"] != null) themeMode = modeValues[data["themeMode"]]!;
+    if (data["sortMethod"] != null) sortMethod = methodValues[data["sortMethod"]]!;
+    if (data["timeSpan"] != null) timeSpan = spanValues[data["timeSpan"]]!;
     if (data["searchResultCount"] != null) searchResultCount = data["searchResultCount"];
     if (data["showCompletedBooks"] != null) showCompletedBooks = data["showCompletedBooks"];
   }
@@ -352,8 +380,9 @@ class SettingsData extends SyncedData {
   @override
   Map<String, dynamic> toJson() => {
     "seedColor": seedColorName(),
-    "themeMode": themeModeName(),
-    "sortMethod": sortMethodName(),
+    "themeMode": modeNames[themeMode]!,
+    "sortMethod": methodNames[sortMethod]!,
+    "timeSpan": spanNames[timeSpan]!,
     "searchResultCount": searchResultCount,
     "showCompletedBooks": showCompletedBooks,
   };
@@ -370,6 +399,11 @@ class SettingsData extends SyncedData {
 
   void setSortMethod(SortMethod method) {
     sortMethod = method;
+    syncToSave();
+  }
+
+  void setTimeSpan(TimeSpan span) {
+    timeSpan = span;
     syncToSave();
   }
 
@@ -390,27 +424,11 @@ class SettingsData extends SyncedData {
     return seedColor.toARGB32().toString();
   }
 
-  String themeModeName() {
-    return modeNames[themeMode]!;
-  }
-
-  String sortMethodName() {
-    return methodNames[sortMethod]!;
-  }
-
   static Color materialColorFromString(String colorString) {
     if (colorValues.containsKey(colorString)) {
       return colorValues[colorString]!;
     }
     return Color(int.parse(colorString));
-  }
-
-  static ThemeMode themeModeFromString(String modeString) {
-    return modeValues[modeString]!;
-  }
-
-  static SortMethod sortMethodFromString(String methodString) {
-    return methodValues[methodString]!;
   }
 }
 
