@@ -47,7 +47,7 @@ class _AboutState extends State<About> {
                   const Text("App info", style: TextStyle(fontWeight: FontWeight.w300, fontSize: 18.0,),),
                   Divider(height: 8.0, color: Theme.of(context).colorScheme.inversePrimary,),
                   Text(
-                    "Version: $appVersion\n\n"
+                    "Version: $appVersionPrefix$appVersion\n\n"
                     "Backwards compatibility: all saves created in booklist 4.0.0 "
                     "or later are compatible with the current version.\n\n"
                     "© 2025 prettytoastie",

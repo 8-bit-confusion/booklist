@@ -393,7 +393,7 @@ class _SettingsState extends State<Settings> {
             ListTile(
               splashColor: Colors.transparent,
               title: const Text("Version:", style: TextStyle(fontWeight: FontWeight.w300,),),
-              subtitle: Text(appVersion,
+              subtitle: Text("$appVersionPrefix$appVersion",
                 style: TextStyle(fontWeight: FontWeight.w300,
                   color: Theme.of(context).colorScheme.primary),
               ),
@@ -415,12 +415,12 @@ class _SettingsState extends State<Settings> {
                       .map((FileSystemEntity fileEntity) => "\t- ${fileEntity.path.substring(fileEntity.path.lastIndexOf("/"))}\n")
                       .toList().join("")}"
                   "colorScheme:\n"
-                  "\t.onSurface: 0x${Theme.of(context).colorScheme.onSurface.value.toRadixString(16).substring(2)}\n"
-                  "\t.primary: 0x${Theme.of(context).colorScheme.primary.value.toRadixString(16).substring(2)}\n"
-                  "\t.fadedPrimary: 0x${Color.lerp(Theme.of(context).colorScheme.inversePrimary, Theme.of(context).colorScheme.onSurface, 0.3)!.value.toRadixString(16).substring(2)}\n"
-                  "\t.darkenedSecondary: 0x${Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondaryContainer, 0.75)!.value.toRadixString(16).substring(2)}\n"
-                  "\t.secondaryContainer: 0x${Theme.of(context).colorScheme.secondaryContainer.value.toRadixString(16).substring(2)}\n"
-                  "\t.surface: 0x${Theme.of(context).colorScheme.surface.value.toRadixString(16).substring(2)}",
+                  "\t.onSurface: 0x${Theme.of(context).colorScheme.onSurface.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.primary: 0x${Theme.of(context).colorScheme.primary.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.fadedPrimary: 0x${Color.lerp(Theme.of(context).colorScheme.inversePrimary, Theme.of(context).colorScheme.onSurface, 0.3)!.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.darkenedSecondary: 0x${Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondaryContainer, 0.75)!.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.secondaryContainer: 0x${Theme.of(context).colorScheme.secondaryContainer.toARGB32().toRadixString(16).substring(2)}\n"
+                  "\t.surface: 0x${Theme.of(context).colorScheme.surface.toARGB32().toRadixString(16).substring(2)}",
                 style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.w300,
                     color: Theme.of(context).colorScheme.primary),
               ),

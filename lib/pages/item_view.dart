@@ -54,7 +54,7 @@ class _ItemViewState extends State<ItemView> {
                 boxShadow: [BoxShadow(
                   blurRadius: 16.0,
                   offset: const Offset(0.0, 8.0),
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.26),
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(64),
                 )],
               ),
               clipBehavior: Clip.antiAlias,

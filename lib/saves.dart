@@ -309,7 +309,7 @@ class SettingsData extends SyncedData {
     if (colorNames.containsKey(seedColor)) {
       return colorNames[seedColor]!;
     }
-    return seedColor.value.toString();
+    return seedColor.toARGB32().toString();
   }
 
   String themeModeName() {
@@ -331,6 +331,7 @@ class SettingsData extends SyncedData {
 late Directory storageRoot;
 late Directory? downloads;
 
-String appVersion = "release_4.5.3";
+late String appVersion;
+String appVersionPrefix = "indev_";
 LibraryData libraryData = LibraryData();
 SettingsData settingsData = SettingsData();

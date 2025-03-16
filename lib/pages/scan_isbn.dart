@@ -130,7 +130,7 @@ class _ScanISBNState extends State<ScanISBN> {
                   ),
                   trailing: libraryData.contains(result) ? Icon(
                     Icons.check_circle,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(97),
                   ) : null,
                   onTap: () async {
                     await Navigator.push(context,

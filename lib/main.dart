@@ -1,6 +1,7 @@
 import 'package:booklist/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'saves.dart';
@@ -15,6 +16,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   storageRoot = await getApplicationDocumentsDirectory();
   downloads = await getDownloadsDirectoryCustom();
+
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  appVersion = packageInfo.version;
 
   if (kDebugMode) {
     print(storageRoot);

@@ -92,7 +92,7 @@ class _LibraryState extends State<Library> {
                           header: Column(
                             children: [
                               Divider(height: 1.0, thickness: 1.0,
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.25),),
+                                color: Theme.of(context).colorScheme.primary.withAlpha(64),),
                               ListTile(
                                 title: const Text("Completed books", style: TextStyle(fontWeight: FontWeight.w300,),),
                                 trailing: const Icon(Icons.chevron_right,),
@@ -103,7 +103,7 @@ class _LibraryState extends State<Library> {
                                 ),
                               ),
                               Divider(height: 1.0, thickness: 1.0,
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.25),),
+                                color: Theme.of(context).colorScheme.primary.withAlpha(64),),
                             ],
                           ),
                           itemBuilder: (BuildContext context, int index) {
