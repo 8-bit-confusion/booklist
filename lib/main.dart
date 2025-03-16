@@ -1,5 +1,5 @@
-import 'dart:io';
-
+import 'package:booklist/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -11,18 +11,17 @@ import 'pages/scan_isbn.dart';
 import 'pages/search.dart';
 import 'pages/stats.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  getApplicationDocumentsDirectory().then((Directory value) {
-    storageRoot = value;
-    getDownloadsDirectory().then((Directory? value) {
-      downloads = value;
+  storageRoot = await getApplicationDocumentsDirectory();
+  downloads = await getDownloadsDirectoryCustom();
 
-      print(storageRoot);
-      print(downloads);
-      runApp(const App());
-    });
-  });
+  if (kDebugMode) {
+    print(storageRoot);
+    print(downloads);
+  }
+
+  runApp(const App());
 }
 
 class App extends StatelessWidget {

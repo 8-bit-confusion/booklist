@@ -331,6 +331,6 @@ class SettingsData extends SyncedData {
 late Directory storageRoot;
 late Directory? downloads;
 
-String appVersion = "release_4.5.2";
+String appVersion = "release_4.5.3";
 LibraryData libraryData = LibraryData();
 SettingsData settingsData = SettingsData();

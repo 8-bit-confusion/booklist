@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 double luma(Color c) {
   return (0.299 * c.red) + (0.587 * c.green) + (0.114 * c.blue);
@@ -15,4 +18,15 @@ Color onColor(BuildContext context, Color color) {
   return surfaceContrast > onSurfaceContrast ?
       Theme.of(context).colorScheme.surface :
       Theme.of(context).colorScheme.onSurface;
+}
+
+Future<Directory?> getDownloadsDirectoryCustom() async {
+  if (Platform.isIOS) {
+    Directory? directory = await getDownloadsDirectory();
+    return directory;
+  }
+
+  Directory? directory = Directory('/storage/emulated/0/Download');
+  if (!directory.existsSync()) directory = null;
+  return directory;
 }
