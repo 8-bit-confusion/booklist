@@ -23,6 +23,8 @@ class _ItemViewState extends State<ItemView> {
 
   final GlobalKey _sizeKey = GlobalKey();
 
+  bool hasRecievedBytes = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,9 +49,8 @@ class _ItemViewState extends State<ItemView> {
             padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 72.0),
             child: Container(
               key: _sizeKey,
-              height: widget.item.coverURL != null ? null : 256,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
+                color: Theme.of(context).colorScheme.secondaryContainer.withAlpha(64),
                 borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                 boxShadow: [BoxShadow(
                   blurRadius: 16.0,
@@ -58,19 +59,31 @@ class _ItemViewState extends State<ItemView> {
                 )],
               ),
               clipBehavior: Clip.antiAlias,
-              child: widget.item.coverURL != null ? Image(
+              child: widget.item.coverURL != null ? Image.network(
+                widget.item.coverURL!,
                 fit: BoxFit.fitWidth,
-                image: NetworkImage(widget.item.coverURL!),
-              ) : Center(
-                child: Text(
-                  "No Cover\nAvailable",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    fontSize: 24.0,
+                frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSyncLoadead) {
+                  hasRecievedBytes = frame != null;
+                  return child;
+                },
+                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? e) {
+                  return (e == null && hasRecievedBytes) ? child : const AspectRatio(
+                    aspectRatio: 0.667,
+                  );
+                },
+              ) : AspectRatio(
+                aspectRatio: 0.667,
+                child: Center(
+                  child: Text(
+                    "No Cover\nAvailable",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      fontSize: 24.0,
+                    ),
                   ),
                 ),
-              ),
+              )
             ),
           ),
           const SizedBox(height: 16.0,),
