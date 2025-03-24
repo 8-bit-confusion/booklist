@@ -253,6 +253,10 @@ class LibraryData extends SyncedData {
   }
 
   void reorder(int startIndex, int endIndex) {
+    if (!settingsData.showCompletedBooks) {
+      // ensure we aren't moving our incomplete books past our hidden completed books
+      endIndex = endIndex.clamp(0, incompleteItemCount());
+    }
     int offset = startIndex < endIndex ? -1 : 0;
     library.insert(endIndex + offset, library.removeAt(startIndex));
     syncToSave();
@@ -260,6 +264,10 @@ class LibraryData extends SyncedData {
 
   void setProgress(Item item, int newProgress) {
     libraryProgress[item.id] = newProgress;
+    if (newProgress == item.pageCount) {
+      // keep completed books after incomplete books
+      library.insert(incompleteItemCount(), library.removeAt(library.indexOf(item.id)));
+    }
     syncToSave();
   }
 

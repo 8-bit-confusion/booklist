@@ -68,9 +68,13 @@ class _LibraryState extends State<Library> {
                       listenable: settingsData,
                       builder: (BuildContext context, Widget? child) {
                         return ReorderableListView.builder(
+                          buildDefaultDragHandles: settingsData.sortMethod == SortMethod.custom,
                           scrollController: _controller,
                           itemCount: settingsData.showCompletedBooks ? libraryData.length : libraryData.incompleteItemCount(),
                           onReorder: (int startIndex, int endIndex) {
+                            print(libraryData.library.map<String>((String id) => libraryData.libraryItems[id]!.title).toList());
+                            print(startIndex);
+                            print(endIndex);
                             libraryData.reorder(startIndex, endIndex);
                           },
                           header: Column(
