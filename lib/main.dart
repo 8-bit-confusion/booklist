@@ -36,6 +36,21 @@ class App extends StatelessWidget {
     return ListenableBuilder(
       listenable: settingsData,
       builder: (BuildContext context, Widget? child) {
+        ThemeData lightRoot = ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: settingsData.seedColor,
+            dynamicSchemeVariant: DynamicSchemeVariant.neutral,
+          )
+        );
+
+        ThemeData darkRoot = ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: settingsData.seedColor,
+            brightness: Brightness.dark,
+            dynamicSchemeVariant: DynamicSchemeVariant.neutral,
+          )
+        );
+
         return MaterialApp(
           title: 'Booklist',
           theme: ThemeData(
@@ -45,6 +60,9 @@ class App extends StatelessWidget {
             ),
             useMaterial3: true,
             fontFamily: "Noto Sans",
+            dialogTheme: DialogThemeData(
+              backgroundColor: lightRoot.colorScheme.surface,
+            ),
           ),
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
@@ -54,6 +72,9 @@ class App extends StatelessWidget {
             ),
             useMaterial3: true,
             fontFamily: "Noto Sans",
+            dialogTheme: DialogThemeData(
+              backgroundColor: darkRoot.colorScheme.surface,
+            ),
           ),
           themeMode: settingsData.themeMode,
           home: const AppRoot(),
