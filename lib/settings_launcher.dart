@@ -16,10 +16,11 @@ class SettingsLauncher extends StatelessWidget {
   Widget build(BuildContext context) {
     return active ? Stack(
       children: [
-        Scaffold(
-          appBar: AppBar(
-            forceMaterialTransparency: true,
-            actions: <Widget>[IconButton(
+        body,
+        AppBar(
+          forceMaterialTransparency: true,
+          actions: <Widget>[
+            IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () async {
                 await Navigator.push(context,
@@ -29,10 +30,8 @@ class SettingsLauncher extends StatelessWidget {
                 );
               },
             )
-            ],
-          ),
+          ],
         ),
-        body,
       ]
     ) : body;
   }
