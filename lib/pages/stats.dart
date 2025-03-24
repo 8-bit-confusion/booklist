@@ -46,7 +46,8 @@ class _StatsState extends State<Stats> {
         .toList();
 
     return SettingsLauncher(
-      body: Container(
+      body: Scaffold(
+        body: Container(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,6 +217,56 @@ class _StatsState extends State<Stats> {
               ),
             )] : []),
           )
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          label: const Text("Log other reading", style: TextStyle(
+            fontWeight: FontWeight.w300,),),
+          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Text(
+                    "Additional reading:",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Text("Date: ", style: TextStyle(fontWeight: FontWeight.w300,
+                              color: Theme.of(context).colorScheme.primary,),),
+                          TextButton(
+                            style: const ButtonStyle(
+                              splashFactory: null,
+                              overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                              padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+                              minimumSize: WidgetStatePropertyAll(Size.zero),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Text("${DateTime.now().toString().split(" ")[0]} ",
+                                  style: TextStyle(color: Theme.of(context).colorScheme.primary,),),
+                                const Icon(Icons.edit),
+                              ],
+                            ),
+                            onPressed: () {
+
+                            },
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                )
+            );
+          },
+        ),
       ),
     );
   }
