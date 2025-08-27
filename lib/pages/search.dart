@@ -8,7 +8,6 @@ import '../pages.dart';
 import '../saves.dart';
 import '../settings_launcher.dart';
 
-
 class Search extends PageContent {
   const Search({super.key});
 

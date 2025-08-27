@@ -16,11 +16,6 @@ enum TimeSpan {
   year,
 }
 
-enum Statistic {
-  pagesRead,
-  booksCompleted,
-}
-
 class Item {
   static String imageURL(String contentID, int zoom) {
     return "https://books.google.com/books/content?id=$contentID&printsec=frontcover&img=1&zoom=$zoom&source=gbs_api";
