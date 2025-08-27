@@ -116,7 +116,7 @@ class _AppRootState extends State<AppRoot> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: currentPage,
           destinations: const <NavigationDestination>[
-            NavigationDestination(icon: Icon(Icons.library_books), label: "Library"),
+            NavigationDestination(icon: Icon(Icons.library_books), label: "Book List"),
             NavigationDestination(icon: Icon(Icons.search), label: "Search"),
             NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: "Scan ISBN"),
             NavigationDestination(icon: Icon(Icons.stacked_line_chart), label: "Stats"),
