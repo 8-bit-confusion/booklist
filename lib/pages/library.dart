@@ -10,7 +10,7 @@ class Library extends PageContent {
   const Library({super.key});
 
   @override
-  String title() { return "Library"; }
+  String title() { return "Book List"; }
 
   @override
   State<Library> createState() => _LibraryState();
@@ -206,12 +206,28 @@ class _LibraryState extends State<Library> {
                                   fontWeight: FontWeight.w300,
                                 ),
                               ),
-                              subtitle: Text(
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis, result.authors,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w300,
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis, result.authors,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ] + (
+                                    libraryData.libraryProgress[result.id] != null && libraryData.libraryProgress[result.id] != 0.0 ? [
+                                      const SizedBox(height: 4.0,),
+                                      FractionallySizedBox(
+                                        widthFactor: 1.0,
+                                        child: LinearProgressIndicator(
+                                          value: (libraryData.libraryProgress[result.id] ?? 0.0) / result.pageCount,
+                                          minHeight: 2.0, borderRadius: BorderRadius.circular(2.0),
+                                        ),
+                                      ),
+                                    ] : []
                                 ),
                               ),
                               onTap: () async {
