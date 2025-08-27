@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../genre.dart';
 import '../saves.dart';
 
 class ItemView extends StatefulWidget {
@@ -62,7 +63,7 @@ class _ItemViewState extends State<ItemView> {
               child: widget.item.coverURL != null ? Image.network(
                 widget.item.coverURL!,
                 fit: BoxFit.fitWidth,
-                frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSyncLoadead) {
+                frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSyncLoaded) {
                   hasRecievedBytes = frame != null;
                   return child;
                 },
@@ -311,7 +312,37 @@ class _ItemViewState extends State<ItemView> {
               ), // override publication date
             ],
           ),
+          const SizedBox(height: 8.0,),
+          Center(
+            child: FutureBuilder(
+              future: getGenre(widget.item.id),
+              builder: (BuildContext context, AsyncSnapshot<List<String>> asyncData) {
+                if (asyncData.hasData) {
+                  return Text(
+                    asyncData.data == [] ? "No genres found" : asyncData.data!
+                            .map((String s) => s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase())
+                            .join(", "),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color.lerp(Theme.of(context).colorScheme.inversePrimary, Theme.of(context).colorScheme.onSurface, 0.1),
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12.0,
+                    ),
+                  );
+                }
 
+                return Text(
+                  "Loading...",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color.lerp(Theme.of(context).colorScheme.inversePrimary, Theme.of(context).colorScheme.onSurface, 0.1),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12.0,
+                  ),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 32.0,),
           libraryData.contains(widget.item) ? OutlinedButton(
             style: ButtonStyle(
