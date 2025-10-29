@@ -74,7 +74,7 @@ class _SettingsState extends State<Settings> {
                 child: SwitchListTile(
                   inactiveThumbColor: Theme.of(context).colorScheme.primary,
                   inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
-                  activeColor: Theme.of(context).colorScheme.secondaryContainer,
+                  activeThumbColor: Theme.of(context).colorScheme.secondaryContainer,
                   activeTrackColor: Theme.of(context).colorScheme.primary,
                   trackOutlineColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.primary),
                   secondary: const Icon(Icons.menu_book),
@@ -166,7 +166,7 @@ class _SettingsState extends State<Settings> {
                     ListTile(
                       leading: const Icon(Icons.download),
                       title: const Text("Export save data", style: TextStyle(fontWeight: FontWeight.w300,),),
-                      subtitle: Text("Export save data to disk as .json file",
+                      subtitle: Text("Export save data to disk as .json files",
                         style: TextStyle(fontWeight: FontWeight.w300,
                             color: Theme.of(context).colorScheme.primary),
                       ),
@@ -194,7 +194,7 @@ class _SettingsState extends State<Settings> {
                           snackBarText = "Could not export—downloads directory does not exist.";
                           snackBarIcon = Icons.error;
                         } else {
-                          String? exportPath = libraryData.export();
+                          String? exportPath = exportSaveData();
                           snackBarText = "Saved as '$exportPath'.";
                           snackBarIcon = Icons.download_done;
                         }
@@ -220,15 +220,14 @@ class _SettingsState extends State<Settings> {
                     ListTile(
                       leading: const Icon(Icons.upload),
                       title: const Text("Import save data", style: TextStyle(fontWeight: FontWeight.w300,),),
-                      subtitle: Text("Load .json save file from disk",
+                      subtitle: Text("Load save directory from disk",
                         style: TextStyle(fontWeight: FontWeight.w300,
                             color: Theme.of(context).colorScheme.primary),
                       ),
                       onTap: () async {
-                        FilePickerResult? result = await FilePicker.platform.pickFiles();
+                        String? result = await FilePicker.platform.getDirectoryPath();
                         if (result != null) {
-                          File importFile = File(result.files.single.path!);
-                          libraryData.import(importFile);
+                          bool successful = importSaveData(Directory(result));
                           if (context.mounted) {
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -238,7 +237,7 @@ class _SettingsState extends State<Settings> {
                                       Icon(Icons.download_done,
                                         color: Theme.of(context).colorScheme.surface,),
                                       const SizedBox(width: 16.0,),
-                                      Text("Save data loaded.", style: TextStyle(
+                                      Text(successful ? "Save data loaded." : "Save data not found in directory.", style: TextStyle(
                                         color: Theme.of(context).colorScheme.surface,),),
                                     ],
                                   ),
@@ -270,7 +269,8 @@ class _SettingsState extends State<Settings> {
                                 ),
                               ),
                               content: Text(
-                                "This will delete all local save data, including saved books and reading progress. This action cannot be undone.",
+                                "This will delete all local save data, including saved books, "
+                                    "reading progress, and statistics. This action cannot be undone.",
                                 style: TextStyle(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.w300,
@@ -288,6 +288,7 @@ class _SettingsState extends State<Settings> {
                                       Navigator.of(context).pop();
                                       for (FileSystemEntity fileEntity in storageRoot.listSync()) {
                                         if (fileEntity.path.endsWith(LibraryData.dataFileName)) fileEntity.deleteSync();
+                                        if (fileEntity.path.endsWith(StatsData.dataFileName)) fileEntity.deleteSync();
                                       }
 
                                       libraryData.syncFromSave();

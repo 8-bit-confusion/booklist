@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -84,9 +85,13 @@ class _StatsState extends State<Stats> {
         .map((int index) => bookBarHeights.sublist(0, index + 1)
             .reduce((double a, double b) => a + b))
         .toList();
+
+    int cutoff = settingsData.timeSpan == TimeSpan.year ? DateTime.now().month :
+        settingsData.timeSpan == TimeSpan.month ? DateTime.now().day :
+        DateTime.now().weekday;
     LineChartBarData bookLineChartBarData = LineChartBarData(
       spots: indexes.map((int index) =>
-        index > DateTime.now().month ? FlSpot.nullSpot : FlSpot(index.toDouble(), bookLineHeights[index]),
+        index >= cutoff ? FlSpot.nullSpot : FlSpot(index.toDouble(), bookLineHeights[index]),
       ).toList(),
       color: Theme.of(context).colorScheme.inversePrimary,
     );
@@ -142,47 +147,37 @@ class _StatsState extends State<Stats> {
                                 fontSize: 16.0,
                               ),
                             ),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                RadioListTile(
-                                  value: TimeSpan.week,
-                                  groupValue: settingsData.timeSpan,
-                                  dense: true,
-                                  title: Text("Week", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                    color: Theme.of(context).colorScheme.primary,),),
-                                  onChanged: (TimeSpan? value) {
-                                    if (value != null) {
-                                      setState(() { settingsData.setTimeSpan(value); });
-                                    }
-                                  },
-                                ),
-                                RadioListTile(
-                                  value: TimeSpan.month,
-                                  groupValue: settingsData.timeSpan,
-                                  dense: true,
-                                  title: Text("Month", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                    color: Theme.of(context).colorScheme.primary,),),
-                                  onChanged: (TimeSpan? value) {
-                                    if (value != null) {
-                                      setState(() { settingsData.setTimeSpan(value); });
-                                    }
-                                  },
-                                ),
-                                RadioListTile(
-                                  value: TimeSpan.year,
-                                  groupValue: settingsData.timeSpan,
-                                  dense: true,
-                                  title: Text("Year", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                    color: Theme.of(context).colorScheme.primary,),),
-                                  onChanged: (TimeSpan? value) {
-                                    if (value != null) {
-                                      setState(() { settingsData.setTimeSpan(value); });
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
+                            content: RadioGroup(
+                              groupValue: settingsData.timeSpan,
+                              onChanged: (TimeSpan? value) {
+                                if (value != null) {
+                                  setState(() { settingsData.setTimeSpan(value); });
+                                }
+                              },
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  RadioListTile(
+                                    value: TimeSpan.week,
+                                    dense: true,
+                                    title: Text("Week", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                      color: Theme.of(context).colorScheme.primary,),),
+                                  ),
+                                  RadioListTile(
+                                    value: TimeSpan.month,
+                                    dense: true,
+                                    title: Text("Month", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                      color: Theme.of(context).colorScheme.primary,),),
+                                  ),
+                                  RadioListTile(
+                                    value: TimeSpan.year,
+                                    dense: true,
+                                    title: Text("Year", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                      color: Theme.of(context).colorScheme.primary,),),
+                                  ),
+                                ],
+                              ),
+                            )
                           )
                       );
                     },
@@ -338,6 +333,10 @@ class _StatsState extends State<Stats> {
                                         tooltipPadding: EdgeInsets.zero,
                                         getTooltipColor: (_) => Colors.transparent,
                                         getTooltipItems: (List<LineBarSpot> spots) {
+                                          if (spots[0].y.isNaN) {
+                                            return [const LineTooltipItem("", TextStyle())];
+                                          }
+
                                           return [LineTooltipItem(spots[0].y.toInt().toString(),
                                               TextStyle(color: Theme.of(context).colorScheme.primary))];
                                         }
@@ -346,8 +345,16 @@ class _StatsState extends State<Stats> {
                                 lineBarsData: [
                                   bookLineChartBarData
                                 ],
-                                showingTooltipIndicators:
-                                indexes.sublist(0, DateTime.now().month + 1).map((int index) => ShowingTooltipIndicators([LineBarSpot(bookLineChartBarData, 0, bookLineChartBarData.spots[index])])).toList()
+                                showingTooltipIndicators: settingsData.timeSpan == TimeSpan.year ?
+                                    indexes.sublist(0, DateTime.now().month).map((int index) =>
+                                        ShowingTooltipIndicators([LineBarSpot(bookLineChartBarData, 0, bookLineChartBarData.spots[index])])
+                                    ).toList() : settingsData.timeSpan == TimeSpan.month ?
+                                    indexes.sublist(DateTime.now().day - 1, DateTime.now().day).map((int index) =>
+                                        ShowingTooltipIndicators([LineBarSpot(bookLineChartBarData, 0, bookLineChartBarData.spots[index])])
+                                    ).toList() :
+                                    indexes.sublist(0, DateTime.now().weekday).map((int index) =>
+                                        ShowingTooltipIndicators([LineBarSpot(bookLineChartBarData, 0, bookLineChartBarData.spots[index])])
+                                    ).toList()
                             ),
                           )
                       ),

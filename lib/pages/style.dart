@@ -172,64 +172,54 @@ class _StyleSettingsState extends State<StyleSettings> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const Text("Theme", style: TextStyle(fontWeight: FontWeight.w300,),),
-                  Column(
-                    children: <Widget>[
-                      RadioListTile(
-                        value: ThemeMode.light,
-                        groupValue: settingsData.themeMode,
-                        dense: true,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("Light", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                              color: Theme.of(context).colorScheme.primary,),),
-                            const Icon(Icons.light_mode),
-                          ],
+                  RadioGroup(
+                    groupValue: settingsData.themeMode,
+                    onChanged: (ThemeMode? value) {
+                      if (value != null) {
+                        setState(() { settingsData.setThemeMode(value); });
+                      }
+                    },
+                    child: Column(
+                      children: <Widget>[
+                        RadioListTile(
+                          value: ThemeMode.light,
+                          dense: true,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text("Light", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                color: Theme.of(context).colorScheme.primary,),),
+                              const Icon(Icons.light_mode),
+                            ],
+                          ),
                         ),
-                        onChanged: (ThemeMode? value) {
-                          if (value != null) {
-                            setState(() { settingsData.setThemeMode(value); });
-                          }
-                        },
-                      ),
-                      RadioListTile(
-                        value: ThemeMode.dark,
-                        groupValue: settingsData.themeMode,
-                        dense: true,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("Dark", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                              color: Theme.of(context).colorScheme.primary,),),
-                            const Icon(Icons.dark_mode),
-                          ],
+                        RadioListTile(
+                          value: ThemeMode.dark,
+                          dense: true,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text("Dark", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                color: Theme.of(context).colorScheme.primary,),),
+                              const Icon(Icons.dark_mode),
+                            ],
+                          ),
                         ),
-                        onChanged: (ThemeMode? value) {
-                          if (value != null) {
-                            setState(() { settingsData.setThemeMode(value); });
-                          }
-                        },
-                      ),
-                      RadioListTile(
-                        value: ThemeMode.system,
-                        groupValue: settingsData.themeMode,
-                        dense: true,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("Sync with phone", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                              color: Theme.of(context).colorScheme.primary,),),
-                            const Icon(Icons.sync),
-                          ],
+                        RadioListTile(
+                          value: ThemeMode.system,
+                          dense: true,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text("Sync with phone", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                color: Theme.of(context).colorScheme.primary,),),
+                              const Icon(Icons.sync),
+                            ],
+                          ),
                         ),
-                        onChanged: (ThemeMode? value) {
-                          if (value != null) {
-                            setState(() { settingsData.setThemeMode(value); });
-                          }
-                        },
-                      ),
-                    ],
-                  )
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

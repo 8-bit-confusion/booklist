@@ -176,7 +176,7 @@ class LibraryData extends SyncedData {
     "readTimestamps": readTimestamps.map((String key, DateTime value) => MapEntry(key, value.toIso8601String())),
   };
 
-  String? export() {
+  String? export(String filepath) {
     String dateTime = DateTime.now().toString();
     dateTime = dateTime.substring(0, dateTime.indexOf("."));
     dateTime = dateTime.replaceAll(RegExp("[:-]"), "");
@@ -184,7 +184,7 @@ class LibraryData extends SyncedData {
 
     String? filename = "books-$dateTime.json";
 
-    File saveFile = File("${downloads!.path}/$filename");
+    File saveFile = File("$filepath/$filename");
     saveFile.writeAsStringSync(jsonEncode(toJson()), flush: true);
 
     return filename;
@@ -460,6 +460,26 @@ class StatsData extends SyncedData {
     "readingUpdates": readingUpdates.map<Map<String, dynamic>>((ReadingUpdate value) => value.toJson()).toList(),
   };
 
+  String? export(String filepath) {
+    String dateTime = DateTime.now().toString();
+    dateTime = dateTime.substring(0, dateTime.indexOf("."));
+    dateTime = dateTime.replaceAll(RegExp("[:-]"), "");
+    dateTime = dateTime.replaceAll(" ", "_");
+
+    String? filename = "stats-$dateTime.json";
+
+    File saveFile = File("$filepath/$filename");
+    saveFile.writeAsStringSync(jsonEncode(toJson()), flush: true);
+
+    return filename;
+  }
+
+  void import(File importFile) {
+    notifyListeners();
+    loadFromJson(jsonDecode(importFile.readAsStringSync()));
+    syncToSave();
+  }
+
   void add(ReadingUpdate update) {
     readingUpdates.add(update);
     syncToSave();
@@ -469,9 +489,48 @@ class StatsData extends SyncedData {
 late Directory storageRoot;
 late Directory? downloads;
 
-late String appVersion;
-String appVersionPrefix = "indev_";
-
 LibraryData libraryData = LibraryData();
 SettingsData settingsData = SettingsData();
 StatsData statsData = StatsData();
+
+String? exportSaveData() {
+  String dateTime = DateTime.now().toString();
+  dateTime = dateTime.substring(0, dateTime.indexOf("."));
+  dateTime = dateTime.replaceAll(RegExp("[:-]"), "");
+  dateTime = dateTime.replaceAll(" ", "_");
+
+  String dirname = "booklist-save-$dateTime";
+  String savePath = "${downloads!.path}/$dirname";
+  Directory saveDirectory = Directory(savePath);
+  if (!saveDirectory.existsSync()) saveDirectory.createSync();
+
+  libraryData.export(savePath);
+  statsData.export(savePath);
+
+  return dirname;
+}
+
+bool importSaveData(Directory importDir) {
+  List<FileSystemEntity> importContents = importDir.listSync();
+
+  File? libraryFile, statsFile;
+  for (FileSystemEntity entity in importContents) {
+    if (entity is File) {
+      String basename = entity.path.split('/').last;
+      if (basename.startsWith("books-") && basename.endsWith(".json")) {
+        libraryFile = entity;
+      } else if (basename.startsWith("stats-") && basename.endsWith(".json")) {
+        statsFile = entity;
+      }
+    }
+  }
+
+  if (libraryFile == null || statsFile == null) return false;
+
+  libraryData.import(libraryFile);
+  statsData.import(statsFile);
+  return true;
+}
+
+late String appVersion;
+String appVersionPrefix = "indev_";

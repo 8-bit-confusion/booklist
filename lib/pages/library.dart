@@ -122,59 +122,43 @@ class _LibraryState extends State<Library> {
                                             fontSize: 16.0,
                                           ),
                                         ),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            RadioListTile(
-                                              value: SortMethod.custom,
-                                              groupValue: settingsData.sortMethod,
-                                              dense: true,
-                                              title: Text("Custom", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                                color: Theme.of(context).colorScheme.primary,),),
-                                              onChanged: (SortMethod? value) {
-                                                if (value != null) {
-                                                  setState(() { settingsData.setSortMethod(value); });
-                                                }
-                                              },
-                                            ),
-                                            RadioListTile(
-                                              value: SortMethod.recent,
-                                              groupValue: settingsData.sortMethod,
-                                              dense: true,
-                                              title: Text("Most recent", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                                color: Theme.of(context).colorScheme.primary,),),
-                                              onChanged: (SortMethod? value) {
-                                                if (value != null) {
-                                                  setState(() { settingsData.setSortMethod(value); });
-                                                }
-                                              },
-                                            ),
-                                            RadioListTile(
-                                              value: SortMethod.title,
-                                              groupValue: settingsData.sortMethod,
-                                              dense: true,
-                                              title: Text("Title (A-Z)", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                                color: Theme.of(context).colorScheme.primary,),),
-                                              onChanged: (SortMethod? value) {
-                                                if (value != null) {
-                                                  setState(() { settingsData.setSortMethod(value); });
-                                                }
-                                              },
-                                            ),
-                                            RadioListTile(
-                                              value: SortMethod.author,
-                                              groupValue: settingsData.sortMethod,
-                                              dense: true,
-                                              title: Text("Author's name (A-Z)", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
-                                                color: Theme.of(context).colorScheme.primary,),),
-                                              onChanged: (SortMethod? value) {
-                                                if (value != null) {
-                                                  setState(() { settingsData.setSortMethod(value); });
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
+                                        content: RadioGroup(
+                                          groupValue: settingsData.sortMethod,
+                                          onChanged: (SortMethod? value) {
+                                            if (value != null) {
+                                              setState(() { settingsData.setSortMethod(value); });
+                                            }
+                                          },
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              RadioListTile(
+                                                value: SortMethod.custom,
+                                                dense: true,
+                                                title: Text("Custom", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                  color: Theme.of(context).colorScheme.primary,),),
+                                              ),
+                                              RadioListTile(
+                                                value: SortMethod.recent,
+                                                dense: true,
+                                                title: Text("Most recent", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                  color: Theme.of(context).colorScheme.primary,),),
+                                              ),
+                                              RadioListTile(
+                                                value: SortMethod.title,
+                                                dense: true,
+                                                title: Text("Title (A-Z)", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                  color: Theme.of(context).colorScheme.primary,),),
+                                              ),
+                                              RadioListTile(
+                                                value: SortMethod.author,
+                                                dense: true,
+                                                title: Text("Author's name (A-Z)", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300,
+                                                  color: Theme.of(context).colorScheme.primary,),),
+                                              ),
+                                            ],
+                                          ),
+                                        )
                                       )
                                   );
                                 },
