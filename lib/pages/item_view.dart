@@ -438,6 +438,33 @@ class _ItemViewState extends State<ItemView> {
             ),
           ) : Container(),
           libraryData.contains(widget.item) ? const SizedBox(height: 12.0,) : Container(),
+          libraryData.contains(widget.item) && libraryData.getProgress(widget.item) == widget.item.pageCount ? OutlinedButton.icon(
+            style: ButtonStyle(
+              side: WidgetStatePropertyAll(BorderSide(
+                color: Theme.of(context).colorScheme.inversePrimary,
+              )),
+            ),
+            label: Text( "Reread from beginning",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w300,
+                fontSize: 14.0,
+              ),
+            ),
+            icon: const Icon(Icons.restart_alt),
+            iconAlignment: IconAlignment.end,
+            onPressed: () {
+              setState(() {
+                DateTime timestamp = DateTime.now();
+                libraryData.library.remove(widget.item.id);
+                libraryData.library.insert(0, widget.item.id);
+
+                libraryData.setProgress(widget.item, 0);
+                libraryData.setReadTimestamp(widget.item, timestamp);
+              });
+            },
+          ) : Container(),
+          libraryData.contains(widget.item) && libraryData.getProgress(widget.item) == widget.item.pageCount ? const SizedBox(height: 12.0,) : Container(),
           Container(
             padding: const EdgeInsets.all(24.0),
             decoration: BoxDecoration(
