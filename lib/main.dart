@@ -25,6 +25,14 @@ void main() async {
     print(downloads);
   }
 
+  mergeSort(libraryData.library, compare: (String idA, String idB) {
+    bool aCompleted = libraryData.isCompleted(libraryData.libraryItems[idA]!);
+    bool bCompleted = libraryData.isCompleted(libraryData.libraryItems[idB]!);
+    if (!aCompleted && bCompleted) return -1;
+    if (aCompleted && !bCompleted) return 1;
+    return 0;
+  });
+
   runApp(const App());
 }
 
